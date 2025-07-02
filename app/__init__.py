@@ -19,7 +19,7 @@ def create_app():
     mail.init_app(app)
 
     # ✅ FIX: Enable CORS with credentials and origin
-    CORS(app, supports_credentials=True, origins=["https://scissorsproperties.com/"])
+    CORS(app, supports_credentials=True, origins=["https://scissorsproperties.com"])
 
     client = MongoClient(app.config['MONGO_URI'])
     app.db = client.get_default_database()
