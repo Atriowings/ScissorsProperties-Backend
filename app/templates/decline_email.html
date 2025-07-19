@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Declined</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .header {
+            background-color: #cc1b2c;
+            color: white;
+            padding: 20px;
+            border-radius: 6px 6px 0 0;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        
+        a {
+            color: #a94442;
+            text-decoration: none;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Registration Declined</h2>
+        </div>
+        <div class="content">
+            <p>Dear {{ user_name }},</p>
+            <p>We regret to inform you that your registration request has been <strong>declined</strong>.</p>
+            <p>If you believe this was in error or would like more details, please reach out to our admin at: 
+                <a href="mailto:{{ admin_email }}">{{ admin_email }}</a>.
+            </p>
+            <p>Thank you for your interest in SCISSORS PROPERTIES.</p>
+            <p>Warm regards,<br><strong>The SCISSORS Team</strong></p>
+        </div>
+        <div class="footer">
+            <p>© 2025 SCISSORS PROPERTIES. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

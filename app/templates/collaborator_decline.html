@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Withdrawal Request Declined</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fef9f9;
+            color: #333;
+            padding: 20px;
+        }
+        .email-container {
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            background-color: #f8d7da;
+            padding: 25px;
+            max-width: 600px;
+            margin: auto;
+        }
+        h2 {
+            color: #721c24;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>Withdrawal Request Declined</h2>
+        <p>Dear {{ collaborator_name }},</p>
+        <p>{{ message }}</p>
+        <p>If you need further assistance, please contact support.</p>
+
+        <div class="footer">
+            This is an automated message. Please do not reply to this email.
+        </div>
+    </div>
+</body>
+</html>

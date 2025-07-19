@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Wallet Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fdf9;
+            color: #333;
+            padding: 20px;
+        }
+        .email-container {
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            background-color: #d4edda;
+            padding: 25px;
+            max-width: 600px;
+            margin: auto;
+        }
+        h2 {
+            color: #155724;
+        }
+        p {
+            font-size: 16px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>Wallet Notification</h2>
+        <p>Hi {{ user_name }},</p>
+        <p>{{ message }}</p>
+        <p>Thank you,<br/>Team</p>
+
+        <div class="footer">
+            This is an automated message. Please do not reply to this email.
+        </div>
+    </div>
+</body>
+</html>
