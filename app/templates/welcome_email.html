@@ -1,0 +1,122 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome</title>
+</head>
+<body>
+    <h3>Welcome {{ user_name }}!</h3>
+    <p>Thank you for registering. Complete your payment to get started.</p>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Welcome to Our Community</title>
+        <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #4a6fa5;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 0 0 5px 5px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: center;
+            color: #777777;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4a6fa5;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .highlight {
+            color: #4a6fa5;
+            font-weight: bold;
+        }
+        .started{
+            color: red;
+        }
+
+        ul {
+            list-style: none; /* Remove default bullets */
+            padding-left: 1em;
+        }
+
+        ul li::before {
+        content: '➤'; /* You can use any arrow symbol you like */
+        color: #333;
+        display: inline-block;
+        width: 1em;
+        margin-left: -1em;
+        }
+
+    </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Welcome to SCISSORS PROPERTIES!</h1>
+        </div>
+
+        <div class="content">
+            <p>Dear {{user_name}},</p>
+
+            <p>We're absolutely <span class="highlight">thrilled</span> to
+                welcome you as our newest collaborator! 🎉</p>
+
+            <p>Your journey with us is just beginning, and we're committed to
+                making this collaboration rewarding every step of the way.</p>
+
+            <p>Here's what you can look forward to: </p>
+            <ul>
+                <li>Exclusive access to our collaborator dashboard</li>
+                <li>Regular updates on your projects and payments</li>
+                <li>Priority support from our team</li>
+                <li>Growth opportunities as we expand together</li>
+            </ul>
+
+            <p>We believe in building <span class="highlight">long-term
+                    relationships</span>, and we're genuinely excited to have
+                you with us till the very end of this rewarding journey.</p>
+
+            <p class="started">To get started, please complete your registration
+                by making your initial payment:</p>
+
+            <br/>
+            <br/>
+
+            <p>If you have any questions or need assistance, don't hesitate to
+                reach out to our support team at <a
+                    href="mailto:support@scissors.com">support@scissors.com</a>.</p>
+
+            <p>Once again, welcome aboard!</p>
+
+            <p>Warm regards,<br>
+                The SCISSORS Team</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 SCISSORS PROPERTIES. All rights reserved.</p>
+            <p>If you didn't request this, please ignore this email.</p>
+        </div>
+    </body>
+</html>

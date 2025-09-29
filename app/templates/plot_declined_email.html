@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Plot Request Declined</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 30px;
+        }
+
+        .email-container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #d32f2f;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #888;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 15px;
+        }
+
+        .highlight {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>Plot Request Declined ❌</h2>
+
+        <p>Dear <strong>{{ user_name }}</strong>,</p>
+
+        <p>We regret to inform you that your plot request under <span class="highlight">Plan {{ plan_type }}</span> has been <strong>declined</strong>.</p>
+
+        <p>If you believe this was a mistake or if you wish to reapply, please contact our support team for further assistance.</p>
+
+        <p>We value your interest and look forward to assisting you again.</p>
+
+        <p>Warm regards,<br><strong>Team Scissor</strong></p>
+
+        <div class="footer">
+            This is an automated message. Please do not reply to this email. For any questions, reach out to our support team.
+        </div>
+    </div>
+</body>
+</html>
