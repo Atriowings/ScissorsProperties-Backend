@@ -6,9 +6,11 @@ from app.auth_controller.auth import (
     approve_wallet_addition,course_to_service_transfer,pay_emi_amount,approve_emi,get_lucky_charm_status,
     request_plot,approve_plot,decline_emi,request_collaborator_withdrawal,approve_collaborator_withdrawal,decline_collaborator_withdrawal
 )
+from app.utils import response_with_code
 
 auth_bp = Blueprint('auth_bp', __name__)
 
+auth_bp.route('/health', methods=['GET'])(lambda: response_with_code(200, "Server is running"))
 auth_bp.route('/register', methods=['POST'])(Signup)
 auth_bp.route('/login', methods=['POST'])(Login)
 auth_bp.route('/forgot-password', methods=['POST'])(Forgot_password)
