@@ -19,12 +19,24 @@ def create_app():
     mail.init_app(app)
 
     # ✅ FIX: Enable CORS with credentials and origin
-    
-    CORS(app, supports_credentials=True, origins=["https://scissorsproperties.com"])
-    # CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+    CORS(app, 
+         supports_credentials=True, 
+         origins=["https://scissorsproperties.com", "https://www.scissorsproperties.com"],
+         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
-    client = MongoClient(app.config['MONGO_URI'])
-    app.db = client.get_default_database()
+    # Database connection with error handling
+    try:
+        if not app.config.get('MONGO_URI'):
+            raise ValueError("MONGO_URI environment variable is not set")
+        client = MongoClient(app.config['MONGO_URI'])
+        app.db = client.get_default_database()
+        # Test the connection
+        app.db.command('ping')
+        print("✅ Database connected successfully")
+    except Exception as e:
+        print(f"❌ Database connection failed: {e}")
+        app.db = None
 
     from app.route_controller.auth_route import auth_bp
     from app.route_controller.admin_route import admin_bp

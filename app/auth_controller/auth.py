@@ -36,72 +36,89 @@ class ResetPasswordSchema(BaseModel):
 
 def Signup():
     try:
+        # Check if database is available
+        if not current_app.db:
+            return response_with_code(500, "Database connection not available")
+            
         data = RegisterSchema(**request.get_json())
     except ValidationError as e:
         return response_with_code(400, "Validation error", e.errors())
+    except Exception as e:
+        print(f"❌ Error in Signup validation: {e}")
+        return response_with_code(400, "Invalid request data")
 
-    referred_by = data.referredBy.lower()
-    referral_id = data.referredById
+    try:
+        referred_by = data.referredBy.lower()
+        referral_id = data.referredById
 
-    # Ensure valid referredBy input
-    valid_referrers = ["partner", "collaborator", "myself", "no one"]
-    if referred_by not in valid_referrers:
-        return response_with_code(400, f"Invalid referredBy value. Must be one of {valid_referrers}")
+        # Ensure valid referredBy input
+        valid_referrers = ["partner", "collaborator", "myself", "no one"]
+        if referred_by not in valid_referrers:
+            return response_with_code(400, f"Invalid referredBy value. Must be one of {valid_referrers}")
 
-    # If referredBy is not "myself" or "no one", referralId must be provided
-    if referred_by not in ["myself", "no one"] and not referral_id:
-        return response_with_code(400, "Referral ID is required for selected referredBy")
+        # If referredBy is not "myself" or "no one", referralId must be provided
+        if referred_by not in ["myself", "no one"] and not referral_id:
+            return response_with_code(400, "Referral ID is required for selected referredBy")
 
-    auth_service = AuthService(current_app.db)
-    partner_user_id = None
-    collaborator_user_id = None
+        auth_service = AuthService(current_app.db)
+        partner_user_id = None
+        collaborator_user_id = None
 
-    if referred_by == "partner":
-        # Validate referralId from partners
-        partner = current_app.db.partners.find_one({"myReferralId": referral_id})
-        if not partner:
-            return response_with_code(400, "Invalid referral ID for partner")
-        partner_user_id = partner["userId"]
+        if referred_by == "partner":
+            # Validate referralId from partners
+            partner = current_app.db.partners.find_one({"myReferralId": referral_id})
+            if not partner:
+                return response_with_code(400, "Invalid referral ID for partner")
+            partner_user_id = partner["userId"]
 
-    elif referred_by == "collaborator":
-        # Validate referralId from payment (userReferredId)
-        collaborator = current_app.db.payment.find_one({"userReferredId": referral_id})
-        if not collaborator:
-            return response_with_code(400, "Invalid referral ID for collaborator")
-        collaborator_user_id = collaborator["userId"]
-        # Note: Plan C restriction must be enforced in the plan/payment step, not here
+        elif referred_by == "collaborator":
+            # Validate referralId from payment (userReferredId)
+            collaborator = current_app.db.payment.find_one({"userReferredId": referral_id})
+            if not collaborator:
+                return response_with_code(400, "Invalid referral ID for collaborator")
+            collaborator_user_id = collaborator["userId"]
+            # Note: Plan C restriction must be enforced in the plan/payment step, not here
 
-    # Proceed to create the user
-    user, error = auth_service.signup(data)
-    if error:
-        return response_with_code(400, error)
+        # Proceed to create the user
+        user, error = auth_service.signup(data)
+        if error:
+            return response_with_code(400, error)
 
-    # Update user with referral metadata
-    current_app.db.users.update_one(
-        {"_id": ObjectId(user['_id'])},
-        {"$set": {
-            "isEmailVerified": True,
-            "referredBy": referred_by,
-            "referredById": referral_id
-        }}
-    )
-
-    # Add to referrals
-    if partner_user_id:
-        current_app.db.partners.update_one(
-            {"userId": ObjectId(partner_user_id)},
-            {"$push": {"referrals": ObjectId(user['_id'])}}
+        # Update user with referral metadata
+        current_app.db.users.update_one(
+            {"_id": ObjectId(user['_id'])},
+            {"$set": {
+                "isEmailVerified": True,
+                "referredBy": referred_by,
+                "referredById": referral_id
+            }}
         )
 
-    if collaborator_user_id:
-        current_app.db.payment.update_one(
-            {"userId": ObjectId(collaborator_user_id)},
-            {"$push": {"referrals": ObjectId(user['_id'])}}
-        )
+        # Add to referrals
+        if partner_user_id:
+            current_app.db.partners.update_one(
+                {"userId": ObjectId(partner_user_id)},
+                {"$push": {"referrals": ObjectId(user['_id'])}}
+            )
 
-    # Send welcome email
-    send_welcome_email(data.user_name, [data.email])
-    return response_with_code(200, "User registered successfully", str(user['_id']))
+        if collaborator_user_id:
+            current_app.db.payment.update_one(
+                {"userId": ObjectId(collaborator_user_id)},
+                {"$push": {"referrals": ObjectId(user['_id'])}}
+            )
+
+        # Send welcome email
+        try:
+            send_welcome_email(data.user_name, [data.email])
+        except Exception as e:
+            print(f"⚠️ Warning: Failed to send welcome email: {e}")
+            # Don't fail the registration if email fails
+        
+        return response_with_code(200, "User registered successfully", str(user['_id']))
+        
+    except Exception as e:
+        print(f"❌ Unexpected error in Signup: {e}")
+        return response_with_code(500, "Internal server error during registration")
     
 def Complete_payment():
     data = request.get_json()
