@@ -20,7 +20,7 @@ def create_app():
 
     # ✅ FIX: Enable CORS with credentials and origin
     
-    CORS(app, supports_credentials=True, origins=["https://scissorsproperties.com"])
+    CORS(app, supports_credentials=True, origins=["https://scissorsproperties.com", "https://scissorsproperties-backend-production.up.railway.app"])
     # CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
     client = MongoClient(app.config['MONGO_URI'])
@@ -37,3 +37,4 @@ def create_app():
     app.register_blueprint(service_bp,url_prefix='/service')
 
     return app
+
