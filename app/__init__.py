@@ -49,3 +49,4 @@ def create_app():
     app.register_blueprint(service_bp,url_prefix='/service')
 
     return app
+
