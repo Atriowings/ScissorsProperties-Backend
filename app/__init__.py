@@ -41,36 +41,12 @@ def create_app():
         print(f"❌ Database connection failed: {e}")
         app.db = None
 
-    # ✅ COMPREHENSIVE CORS HANDLING
-    @app.before_request
-    def handle_cors():
-        from flask import request, make_response
-        
-        # Handle preflight requests
-        if request.method == "OPTIONS":
-            response = make_response()
-            response.headers.add("Access-Control-Allow-Origin", "https://scissorsproperties.com")
-            response.headers.add("Access-Control-Allow-Origin", "https://www.scissorsproperties.com")
-            response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin")
-            response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
-            response.headers.add("Access-Control-Allow-Credentials", "true")
-            response.headers.add("Access-Control-Max-Age", "3600")
-            return response
-
-    @app.after_request
-    def after_request(response):
-        # Add CORS headers to all responses
-        origin = request.headers.get('Origin')
-        if origin in ['https://scissorsproperties.com', 'https://www.scissorsproperties.com']:
-            response.headers.add('Access-Control-Allow-Origin', origin)
-        else:
-            response.headers.add('Access-Control-Allow-Origin', 'https://scissorsproperties.com')
-        
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin')
-        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        response.headers.add('Access-Control-Max-Age', '3600')
-        return response
+    # ✅ SIMPLE CORS CONFIGURATION
+    CORS(app, 
+         origins=['https://scissorsproperties.com', 'https://www.scissorsproperties.com'],
+         allow_headers=['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+         methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+         supports_credentials=True)
 
     from app.route_controller.auth_route import auth_bp
     from app.route_controller.admin_route import admin_bp

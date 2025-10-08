@@ -35,6 +35,10 @@ class ResetPasswordSchema(BaseModel):
     confirm_password:str
 
 def Signup():
+    # Handle OPTIONS request for CORS preflight
+    if request.method == 'OPTIONS':
+        return response_with_code(200, "OK")
+    
     try:
         # Check if database is available
         if current_app.db is None:
