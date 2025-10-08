@@ -38,10 +38,16 @@ def Signup():
     try:
         # Check if database is available
         if current_app.db is None:
+            print("❌ Database connection not available")
             return response_with_code(500, "Database connection not available")
+        
+        # Log the incoming request
+        request_data = request.get_json()
+        print(f"📝 Signup request received: {request_data}")
             
-        data = RegisterSchema(**request.get_json())
+        data = RegisterSchema(**request_data)
     except ValidationError as e:
+        print(f"❌ Validation error: {e.errors()}")
         return response_with_code(400, "Validation error", e.errors())
     except Exception as e:
         print(f"❌ Error in Signup validation: {e}")
