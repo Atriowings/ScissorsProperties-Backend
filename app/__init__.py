@@ -19,15 +19,16 @@ def create_app():
     mail.init_app(app)
 
     # ✅ FIX: Enable CORS with credentials and origin
+    frontend_url = app.config.get('FRONTEND_URL')
     CORS(app, 
          supports_credentials=True, 
-         origins=["https://scissorsproperties.com", "https://www.scissorsproperties.com"],
+         origins=[frontend_url, "https://scissorsproperties.com", "https://www.scissorsproperties.com"],
          allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
     # Database connection with error handling
     try:
-        if not app.config.get('MONGO_URI'):
+        if app.config.get('MONGO_URI') is None:
             raise ValueError("MONGO_URI environment variable is not set")
         client = MongoClient(app.config['MONGO_URI'])
         app.db = client.get_default_database()

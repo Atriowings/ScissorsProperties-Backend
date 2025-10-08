@@ -37,7 +37,7 @@ class ResetPasswordSchema(BaseModel):
 def Signup():
     try:
         # Check if database is available
-        if not current_app.db:
+        if current_app.db is None:
             return response_with_code(500, "Database connection not available")
             
         data = RegisterSchema(**request.get_json())
