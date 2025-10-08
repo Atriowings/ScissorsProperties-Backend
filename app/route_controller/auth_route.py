@@ -12,6 +12,9 @@ auth_bp = Blueprint('auth_bp', __name__)
 
 auth_bp.route('/health', methods=['GET'])(lambda: response_with_code(200, "Server is running"))
 auth_bp.route('/test-cors', methods=['GET', 'POST', 'OPTIONS'])(lambda: response_with_code(200, "CORS test successful"))
+
+# Specific OPTIONS handler for register endpoint
+auth_bp.route('/register', methods=['OPTIONS'])(lambda: response_with_code(200, "OK"))
 auth_bp.route('/register', methods=['POST'])(Signup)
 auth_bp.route('/login', methods=['POST'])(Login)
 auth_bp.route('/forgot-password', methods=['POST'])(Forgot_password)

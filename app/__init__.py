@@ -18,28 +18,6 @@ def create_app():
     jwt.init_app(app)
     mail.init_app(app)
 
-    # ✅ FIX: Enable CORS with comprehensive configuration
-    CORS(app, 
-         supports_credentials=True, 
-         origins=[
-             "https://scissorsproperties.com", 
-             "https://www.scissorsproperties.com",
-             "http://localhost:3000",
-             "http://127.0.0.1:3000"
-         ],
-         allow_headers=[
-             "Content-Type", 
-             "Authorization", 
-             "X-Requested-With",
-             "Accept",
-             "Origin",
-             "Access-Control-Request-Method",
-             "Access-Control-Request-Headers"
-         ],
-         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-         expose_headers=["Content-Range", "X-Content-Range"],
-         max_age=3600)
-
     # Database connection with error handling
     try:
         if app.config.get('MONGO_URI') is None:
@@ -63,16 +41,36 @@ def create_app():
         print(f"❌ Database connection failed: {e}")
         app.db = None
 
-    # Add CORS preflight handler
+    # ✅ COMPREHENSIVE CORS HANDLING
     @app.before_request
-    def handle_preflight():
+    def handle_cors():
         from flask import request, make_response
+        
+        # Handle preflight requests
         if request.method == "OPTIONS":
             response = make_response()
-            response.headers.add("Access-Control-Allow-Origin", "*")
-            response.headers.add('Access-Control-Allow-Headers', "*")
-            response.headers.add('Access-Control-Allow-Methods', "*")
+            response.headers.add("Access-Control-Allow-Origin", "https://scissorsproperties.com")
+            response.headers.add("Access-Control-Allow-Origin", "https://www.scissorsproperties.com")
+            response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin")
+            response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
+            response.headers.add("Access-Control-Allow-Credentials", "true")
+            response.headers.add("Access-Control-Max-Age", "3600")
             return response
+
+    @app.after_request
+    def after_request(response):
+        # Add CORS headers to all responses
+        origin = request.headers.get('Origin')
+        if origin in ['https://scissorsproperties.com', 'https://www.scissorsproperties.com']:
+            response.headers.add('Access-Control-Allow-Origin', origin)
+        else:
+            response.headers.add('Access-Control-Allow-Origin', 'https://scissorsproperties.com')
+        
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        response.headers.add('Access-Control-Max-Age', '3600')
+        return response
 
     from app.route_controller.auth_route import auth_bp
     from app.route_controller.admin_route import admin_bp

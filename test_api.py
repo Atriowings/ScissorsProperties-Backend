@@ -12,21 +12,28 @@ BACKEND_URL = "https://scissorsproperties-backend-production.up.railway.app"
 def test_cors_headers():
     """Test CORS headers"""
     try:
-        response = requests.options(f"{BACKEND_URL}/auth/test-cors", 
+        # Test OPTIONS request to register endpoint specifically
+        response = requests.options(f"{BACKEND_URL}/auth/register", 
                                   headers={'Origin': 'https://scissorsproperties.com'})
         
-        print(f"CORS OPTIONS test: {response.status_code}")
-        print(f"CORS Headers: {dict(response.headers)}")
+        print(f"CORS OPTIONS test for /auth/register: {response.status_code}")
+        print(f"Response Headers: {dict(response.headers)}")
         
         # Check for CORS headers
         cors_headers = {
             'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
             'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
             'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+            'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
         }
         
         print(f"CORS Headers Found: {cors_headers}")
-        return response.status_code == 200
+        
+        # Check if all required headers are present
+        required_headers = ['Access-Control-Allow-Origin', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers']
+        has_required_headers = all(header in cors_headers for header in required_headers)
+        
+        return response.status_code == 200 and has_required_headers
         
     except Exception as e:
         print(f"CORS test failed: {e}")
@@ -67,6 +74,15 @@ def test_register_endpoint():
         
         print(f"Register test: {response.status_code}")
         print(f"Response: {response.text}")
+        print(f"Response Headers: {dict(response.headers)}")
+        
+        # Check for CORS headers in response
+        cors_headers = {
+            'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+            'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+            'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+        }
+        print(f"CORS Headers in Response: {cors_headers}")
         
         # Check if we get a proper response (not CORS error)
         return response.status_code in [200, 400, 500]  # Any proper HTTP response
