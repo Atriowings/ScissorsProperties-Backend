@@ -22,7 +22,7 @@ def create_app():
     frontend_url = app.config.get('FRONTEND_URL', 'http://localhost:3000')
     CORS(app, 
          supports_credentials=True, 
-         origins=[frontend_url, "https://scissorsproperties.com", "https://www.scissorsproperties.com"],
+         origins=[frontend_url, "https://scissorsproperties.com", "https://www.scissorsproperties.com", "http://localhost:3000"],
          allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
