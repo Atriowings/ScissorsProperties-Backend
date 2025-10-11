@@ -53,10 +53,10 @@ def create_app():
     from app.route_controller.partner_route import partner_bp
     from app.route_controller.service_route import service_bp
 
-    app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(admin_bp,url_prefix='/admin')
-    app.register_blueprint(partner_bp,url_prefix='/partner')
-    app.register_blueprint(service_bp,url_prefix='/service')
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(admin_bp,url_prefix='/api/admin')
+    app.register_blueprint(partner_bp,url_prefix='/api/partner')
+    app.register_blueprint(service_bp,url_prefix='/api/service')
 
     return app
 
