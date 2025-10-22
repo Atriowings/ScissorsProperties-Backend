@@ -18,18 +18,21 @@ def create_app():
     jwt.init_app(app)
     mail.init_app(app)
 
-    # ✅ FIX: Enable CORS with credentials and origin
-    CORS(app, 
-         supports_credentials=True, 
-         origins=["https://scissorsproperties.com", "https://www.scissorsproperties.com"],
-         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
-         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
-
     # Database connection with error handling
     try:
-        if not app.config.get('MONGO_URI'):
+        if app.config.get('MONGO_URI') is None:
             raise ValueError("MONGO_URI environment variable is not set")
-        client = MongoClient(app.config['MONGO_URI'])
+        
+        # Add SSL configuration to fix handshake issues
+        client = MongoClient(
+            app.config['MONGO_URI'],
+            tls=True,
+            tlsAllowInvalidCertificates=True,
+            tlsAllowInvalidHostnames=True,
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=10000,
+            socketTimeoutMS=20000
+        )
         app.db = client.get_default_database()
         # Test the connection
         app.db.command('ping')
@@ -38,15 +41,22 @@ def create_app():
         print(f"❌ Database connection failed: {e}")
         app.db = None
 
+    # ✅ SIMPLE CORS CONFIGURATION
+    CORS(app, 
+         origins=['https://scaj.shop', 'https://www.scaj.shop'],
+         allow_headers=['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+         methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+         supports_credentials=True)
+
     from app.route_controller.auth_route import auth_bp
     from app.route_controller.admin_route import admin_bp
     from app.route_controller.partner_route import partner_bp
     from app.route_controller.service_route import service_bp
 
-    app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(admin_bp,url_prefix='/admin')
-    app.register_blueprint(partner_bp,url_prefix='/partner')
-    app.register_blueprint(service_bp,url_prefix='/service')
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(admin_bp,url_prefix='/api/admin')
+    app.register_blueprint(partner_bp,url_prefix='/api/partner')
+    app.register_blueprint(service_bp,url_prefix='/api/service')
 
     return app
 
