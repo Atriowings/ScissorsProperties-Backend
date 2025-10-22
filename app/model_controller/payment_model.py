@@ -204,14 +204,6 @@ class Payment:
                     send_emi_confirmation_email(user)
 
             return update_fields
-        
-            # Send reminder if past first month and still pending.=> use it for future above code
-            # if paid > 0 and new_pending > 0:
-            #     user = self.db.users.find_one({"_id": ObjectId(user_id)})
-            #     if user:
-            #         send_emi_confirmation_email(user)
-
-            # return update_fields
 
         return {"message": "EMI payment already completed."}
 

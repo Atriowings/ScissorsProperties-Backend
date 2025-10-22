@@ -5,6 +5,8 @@ import random
 import string
 from app.model_controller.create_plots_model import PlotModel
 from app.model_controller.partner_model import Partner
+from app.model_controller.agent_model import Agent
+from app.model_controller.dealer_model import Dealer
 from app.model_controller.auth_model import User
 from app.model_controller.payment_model import Payment
 from app.model_controller.admin_model import Admin
@@ -79,32 +81,36 @@ class PaymentService:
                 {"$set": {"hasCompletedInitialPayment": True}}
             )
 
-            # ADD THIS BLOCK:
-        if plan_type in ['C', 'D']:
-            plot_input = {
-               "userId": ObjectId(user_id),
-               "planType": plan_type,
-               "upi": upi,
-               "upiMobileNumber": upi_mobile_number
-        }
-        plot_data = self.create_plots_model.create_plot(plot_input)
-        if plot_data:
-            self.db.plots.insert_one(plot_data)
-            self.create_plots_model.update_user_plots(user_id, plot_data["plots"])
-        # ✅ Plan C: request EMI approval
-        # if plan_type == 'C':
-        if plan_type in ['C', 'D']: # plan D adding
-            self.payment_model.payment.update_one(
-                {"userId": ObjectId(user_id)},
-                {"$set": {"emiPaymentRequested": True}}
-            )
-            self.send_admin_credentials_email(user, plan_type,upi)
+            # ✅ Generate credentials for EMI users (Plan C & D) after first payment
+        # if plan_type in ["C", "D"] and not user.get("credentialsSent", False):
+        #     username = str(random.randint(100000000, 999999999))
+        #     plain_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        #     hashed_password = generate_password_hash(plain_password)
 
-        elif plan_type in ['A', 'B', 'Other']: # adding Other
-            self.send_admin_credentials_email(user, plan_type,upi)
+        #     self.auth_model.users.update_one(
+        #         {"_id": ObjectId(user_id)},
+        #         {
+        #             "$set": {
+        #                 "username": username,
+        #                 "password": hashed_password,
+        #                 "credentialsSent": True
+        #             }
+        #         }
+        #     )
+
+        # ✅ Plan C & D: request EMI approval
+        if plan_type in ['C', 'D']:
+            self.payment_model.payment.update_one(
+            {"userId": ObjectId(user_id)},
+            {"$set": {"emiPaymentRequested": True}}
+        )
+            self.send_admin_credentials_email(user, plan_type, upi)
+
+        elif plan_type in ['A', 'B', 'Other']:
+            self.send_admin_credentials_email(user, plan_type, upi)
 
         return str(user_id), None
-    
+        
     def send_admin_credentials_email(self, user, plan_type,upi):
         user_data = {
             "user_name": user.get("userName") or user.get("user_name"),
@@ -117,8 +123,6 @@ class PaymentService:
         send_admin_notification_email(user_data)
 
     def mark_payment_complete_and_send_credentials(self, user_id):
-        
-        # commented from here
         user = self.auth_model.find_by_id(user_id)
         if not user:
             return response_with_code(404, "User not found")
@@ -134,23 +138,18 @@ class PaymentService:
         self.db.payment.update_one(
             {"userId": ObjectId(user_id)},
             {"$set": {"updatedAt": datetime.utcnow(),"initialPlanAorBaccepted":True}}
-        ) 
-
-        self.db.plots.update_one(
-            {"userId": ObjectId(user_id)},
-            {"$set": {
-                "fullPaymentStatus": "Completed",
-                "updatedAt": datetime.utcnow()
-            }}
         )
-
-
+        # self.db.plots.update_one(
+        #     {"userId": ObjectId(user_id)},
+        #     {"$set": {
+        #         "fullPaymentStatus": "Completed",
+        #         "updatedAt": datetime.utcnow()
+        #     }}
+        # )
         if self.auth_model.has_sent_credentials(user_id):
             return response_with_code(200, "Payment marked complete. Credentials already sent.")
 
-
-
-        # ✅ Create plot data today commented from here
+        # ✅ Create plot data
         plot_input = {
             "userId": ObjectId(user_id),
             "planType": plan_type,
@@ -165,22 +164,21 @@ class PaymentService:
         self.db.plots.insert_one(plot_data)
         self.create_plots_model.update_user_plots(user_id, plot_data["plots"])
 
-        existing_plot = self.db.plots.find_one({"userId": ObjectId(user_id)})
-        if existing_plot:
-            self.db.plots.update_one(
-                {"_id": existing_plot["_id"]},
-                {
-                    "$set": {
-                        "additionalPlotPurchase": plot_data.get("additionalPlotPurchase", {}),
-                        "updatedAt": datetime.utcnow(),
-                        "fullPaymentStatus": "Completed"
-                    }
-                }
-            )
-            self.create_plots_model.update_user_plots(user_id, existing_plot["plots"])
+        # existing_plot = self.db.plots.find_one({"userId": ObjectId(user_id)})
+        # if existing_plot:
+        #     self.db.plots.update_one(
+        #         {"_id": existing_plot["_id"]},
+        #         {
+        #             "$set": {
+        #                 "additionalPlotPurchase": plot_data.get("additionalPlotPurchase", {}),
+        #                 "updatedAt": datetime.utcnow(),
+        #                 "fullPaymentStatus": "Completed"
+        #             }
+        #         }
+        #     )
+        #     self.create_plots_model.update_user_plots(user_id, existing_plot["plots"])
         # else:
-            # Insert new plot if not exists
-
+        #     # Insert new plot if not exists
 
         referral_id = user.get("referredById")
         if referral_id: 
@@ -195,17 +193,6 @@ class PaymentService:
                 )
                 commission = round(plan_amount * 0.10)
                 self.partner_model.update_wallet(partner_id, commission, referral_id)
-
-        user = self.auth_model.find_by_id(user_id)
-        if not user:
-          return response_with_code(404, "User not found")
-
-        if self.auth_model.has_sent_credentials(user_id):
-          return response_with_code(200, "Credentials already sent.")
-
-        plot = self.db.plots.find_one({"_id": ObjectId(plot_id), "userId": ObjectId(user_id)})
-        if not plot:
-          return response_with_code(404, "Plot not found")        
         # ✅ Generate credentials
         prefix = "500550"
         suffix = "5"
@@ -244,6 +231,7 @@ class PaymentService:
                 continue
 
         return response_with_code(500, "Failed to generate unique username.")
+
     # ----------
 
     def get_user_wallet_balance(self, user_id):
@@ -572,13 +560,21 @@ class PaymentService:
         if user and updated_pending > 0:
             send_emi_confirmation_email(user, amount)
 
+        # if user:
+        #     send_emi_approved_email(
+        #         to_email=user.get("email"),
+        #         user_name=user.get("user_name") or user.get("userName", "User"),
+        #         plot_code=plot.get("plots"),
+        #         amount=amount
+        #     )
+        # After sending approved email
         if user:
             send_emi_approved_email(
-                to_email=user.get("email"),
-                user_name=user.get("user_name") or user.get("userName", "User"),
-                plot_code=plot.get("plots"),
-                amount=amount
-            )
+               to_email=user.get("email"),
+               user_name=user.get("user_name") or user.get("userName", "User"),
+               plot_code=plot.get("plots"),
+               amount=amount
+           )
 
         return {
             "paidMonths": updated_paid,

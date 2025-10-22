@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Agent Request Declined</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      padding: 30px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .header {
+      background-color: #cc1b2c;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 6px 6px 0 0;
+    }
+    .header h2 {
+      margin: 0;
+    }
+    .content {
+      padding: 20px;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #cc1b2c;
+    }
+    .footer {
+      font-size: 12px;
+      color: #777;
+      margin-top: 20px;
+      text-align: center;
+    }
+    a {
+      color: #4a6fa5;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Agent Request Declined</h2>
+    </div>
+    <div class="content">
+      <p>Dear {{ user_name }},</p>
+
+      <p>We appreciate your interest in becoming a Agent with <strong>SCISSORS PROPERTIES</strong>.</p>
+
+      <p>Unfortunately, after careful review, we must inform you that your request has been 
+      <span class="highlight">declined</span> at this time.</p>
+
+      <p>If you feel this decision may have been a mistake or you’d like more information, please don’t hesitate to 
+      contact our support team at <a href="mailto:support@scissors.com">support@scissors.com</a>.</p>
+
+      <p>We value your enthusiasm and encourage you to stay connected with us for future opportunities.</p>
+
+      <p>Warm regards,<br>
+      The SCISSORS Admin Team</p>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 SCISSORS PROPERTIES. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

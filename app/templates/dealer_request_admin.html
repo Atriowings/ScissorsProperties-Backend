@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>New Dealer Request</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      color: #333;
+      background-color: #f4f4f4;
+      padding: 30px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 25px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+    .header {
+      background-color: #4a6fa5;
+      color: #ffffff;
+      padding: 20px;
+      text-align: center;
+      border-radius: 6px 6px 0 0;
+    }
+    .header h2 {
+      margin: 0;
+    }
+    .content {
+      padding: 20px;
+    }
+    .info {
+      margin: 15px 0;
+    }
+    .info strong {
+      color: #4a6fa5;
+    }
+    .footer {
+      margin-top: 25px;
+      font-size: 13px;
+      text-align: center;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>New Dealer Request</h2>
+    </div>
+    <div class="content">
+      <p>A new Dealer has submitted a request to join the SCISSORS PROPERTIES network.</p>
+
+      <div class="info">
+        <p><strong>Dealer Name:</strong> {{ Dealer_name }}</p>
+        <p><strong>Email:</strong> {{ email }}</p>
+      </div>
+
+      <p>Please log in to the <strong>Admin Dashboard</strong> to review and process this request.</p>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 SCISSORS PROPERTIES. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

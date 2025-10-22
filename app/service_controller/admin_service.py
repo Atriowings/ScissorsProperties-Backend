@@ -202,12 +202,14 @@ class AdminService:
 
             # ✅ Commission logic if referred by someone and fully paid
             referral_id = user.get("referralId")
-            if referral_id and payment_status == "Completed" or (plan_type == 'C' and payment):
+            if referral_id and payment_status == "Completed" or plan_type in ["C", "D"] and payment:
                 level1_partner = self.partner_model.get_by_referral_code(referral_id)
                 if level1_partner:
                     level1_partner_id = level1_partner.get("userId")
 
                     if plan_type == "C":
+                        self.partner_model.update_wallet(level1_partner_id, 1500, referral_id)
+                    elif plan_type == "C":
                         self.partner_model.update_wallet(level1_partner_id, 1500, referral_id)
 
             if plan_type in ['A', 'B']:

@@ -72,6 +72,10 @@ class PlotService:
             paid_months = final_plot.get("paidMonths", 0)
             total_months = final_plot.get("totalMonths", 0)
             final_plot["fullPaymentStatus"] = "Completed" if paid_months >= total_months else "Pending"
+        if final_plot["planType"] == "D":
+            paid_months = final_plot.get("paidMonths", 0)
+            total_months = final_plot.get("totalMonths", 0)
+            final_plot["fullPaymentStatus"] = "Completed" if paid_months >= total_months else "Pending"    
         else:
             final_plot["fullPaymentStatus"] = "Pending"
 
@@ -99,27 +103,36 @@ class PlotService:
             )
 
             # ✅ If it's Plan C and an additional plot, give commission and clear fields
-            if final_plot["planType"] == "C":
+            if final_plot["planType"] in ["C", "D"]:
                 user = self.db.users.find_one({"_id": plot["userId"]})
                 referral_id = user.get("referredById") if user else None
 
                 if referral_id:
                     partner = self.db.partners.find_one({"myReferralId": referral_id})
                     if partner:
-                        self.db.partners.update_one(
-                            {"userId": partner["userId"], "myReferralId": referral_id},
-                            {
-                                "$inc": {
-                                    "commissionWallet.commissionWalletBalance": 1500
-                                },
-                                "$push": {
-                                    "commissionHistory": {
-                                        "amount": 1500,
-                                        "date": datetime.utcnow()
-                                    }
-                                }
-                            }
-                        )
+                         # ✅ Set commission amount based on plan type
+                        if final_plot["planType"] == "C":
+                          commission_amount = 1500
+                        elif final_plot["planType"] == "D":
+                          commission_amount = 1500  # or 1000 — adjust as per your business logic
+
+                        # ✅ Update partner's commission wallet and history
+                    self.db.partners.update_one(
+                      {"userId": partner["userId"], "myReferralId": referral_id},
+                       {
+                       "$inc": {
+                        "commissionWallet.commissionWalletBalance": commission_amount
+                    },
+                    "$push": {
+                        "commissionHistory": {
+                            "amount": commission_amount,
+                            "date": datetime.utcnow(),
+                            "planType": final_plot["planType"],
+                            "remarks": f"Referral commission for Plan {final_plot['planType']}"
+                        }
+                    }
+                       }
+                    )
 
                 # ✅ Clear additional plot purchase fields
                 self.db.payment.update_one(

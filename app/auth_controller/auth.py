@@ -73,6 +73,8 @@ def Signup():
         auth_service = AuthService(current_app.db)
         partner_user_id = None
         collaborator_user_id = None
+        dealer_user_id = None
+        agent_user_id = None
 
         if referred_by == "partner":
             # Validate referralId from partners
@@ -88,6 +90,20 @@ def Signup():
                 return response_with_code(400, "Invalid referral ID for collaborator")
             collaborator_user_id = collaborator["userId"]
             # Note: Plan C restriction must be enforced in the plan/payment step, not here
+
+        elif referred_by == "dealer":
+        # Validate referralId from payment (userReferredId)
+            dealer = current_app.db.payment.find_one({"userReferredId": referral_id})
+            if not dealer:
+                return response_with_code(400, "Invalid referral ID for dealer")
+            dealer_user_id = dealer["userId"]   
+
+        elif referred_by == "agent":
+        # Validate referralId from payment (userReferredId)
+            agent = current_app.db.payment.find_one({"userReferredId": referral_id})
+            if not agent:
+                return response_with_code(400, "Invalid referral ID for agent")
+            agent_user_id = agent["userId"]       
 
         # Proceed to create the user
         user, error = auth_service.signup(data)
@@ -116,6 +132,18 @@ def Signup():
                 {"userId": ObjectId(collaborator_user_id)},
                 {"$push": {"referrals": ObjectId(user['_id'])}}
             )
+
+        if dealer_user_id:
+            current_app.db.payment.update_one(
+                {"userId": ObjectId(dealer_user_id)},
+                {"$push": {"referrals": ObjectId(user['_id'])}}
+        )
+    
+        if agent_user_id:
+            current_app.db.payment.update_one(
+                {"userId": ObjectId(agent_user_id)},
+                {"$push": {"referrals": ObjectId(user['_id'])}}
+            )    
 
         # Send welcome email
         try:
@@ -657,4 +685,3 @@ def decline_collaborator_withdrawal():
         )
 
     return response_with_code(200, "Withdrawal request declined and notification email sent")
-

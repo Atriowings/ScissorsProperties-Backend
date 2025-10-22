@@ -113,7 +113,8 @@ def send_admin_notification_email(user):
     plan_type_map = {
         'A': 'Plan A (₹6,00,000)',
         'B': 'Plan B (₹3,00,000)',
-        'C': 'Plan C (₹5,000 - 60 months EMI)'
+        'C': 'Plan C (₹5,000 - 60 months EMI)',
+        'D': 'Plan D (₹2,000 - 150 months EMI)'
     }
 
     plan_type = plan_type_map.get(user.get('plan'), 'N/A')
@@ -130,7 +131,7 @@ UPI      : {user.get('upi', 'N/A')}
 PlanType : {plan_type}
 Amount   : {formatted_amount}
 
-Approve here: https://scissorsproperties-backend.onrender.com/admin-login
+Approve here: https://scissorsproperties-backend-production.up.railway.app/admin-login
 """
     mail.send(msg)
 
@@ -201,7 +202,73 @@ def send_partner_decline_email(user_name, to_email):
     msg.html = html
     mail = current_app.extensions['mail']
     mail.send(msg)
+# --------------------
+def send_dealer_credentials_email(dealer_name, to_email):
+    # Ensure to_email is a string
+    if isinstance(to_email, list):
+        to_email = to_email[0]
 
+    print(f"📧 Sending dealer approval email to: {to_email}, dealerName: {dealer_name}")
+
+    # Render template with just the dealer
+    html = render_template('dealer_credentials.html', dealer_name=dealer_name)
+    
+    msg = Message('Your Dealer ID is Ready', recipients=[to_email])
+    msg.html = html
+    mail.send(msg)
+
+def send_dealer_request_email_to_admin(dealer_name, email, user_id):
+    admin_email = "scissorsproperties2025@gmail.com"
+    subject = "🔔 New Dealer Request"
+    html = render_template("dealer_request_admin.html", dealer_name=dealer_name, email=email, user_id=user_id)
+    msg = Message(subject=subject, recipients=[admin_email])
+    msg.html = html
+    mail.send(msg)
+
+
+def send_dealer_decline_email(user_name, to_email):
+    if isinstance(to_email, list):
+        to_email = to_email[0]
+
+    html = render_template('dealer_decline.html', user_name=user_name)
+    msg = Message('Dealer Request Declined', recipients=[to_email])
+    msg.html = html
+    mail = current_app.extensions['mail']
+    mail.send(msg)
+
+# --------------------
+def send_agent_credentials_email(agent_name, to_email):
+    # Ensure to_email is a string
+    if isinstance(to_email, list):
+        to_email = to_email[0]
+
+    print(f"📧 Sending agent approval email to: {to_email}, dealerName: {agent_name}")
+
+    # Render template with just the agent
+    html = render_template('agent_credentials.html', agent_name=agent_name)
+    
+    msg = Message('Your Agent ID is Ready', recipients=[to_email])
+    msg.html = html
+    mail.send(msg)
+
+def send_agent_request_email_to_admin(agent_name, email, user_id):
+    admin_email = "scissorsproperties2025@gmail.com"
+    subject = "🔔 New Agent Request"
+    html = render_template("agent_request_admin.html", agent_name=agent_name, email=email, user_id=user_id)
+    msg = Message(subject=subject, recipients=[admin_email])
+    msg.html = html
+    mail.send(msg)
+
+
+def send_agent_decline_email(user_name, to_email):
+    if isinstance(to_email, list):
+        to_email = to_email[0]
+
+    html = render_template('agent_decline.html', user_name=user_name)
+    msg = Message('Agent Request Declined', recipients=[to_email])
+    msg.html = html
+    mail = current_app.extensions['mail']
+    mail.send(msg)    
 # def is_session_expired():
 #     login_time_str = session.get("login_time")
 #     if not login_time_str:

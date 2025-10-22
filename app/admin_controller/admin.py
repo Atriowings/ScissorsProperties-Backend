@@ -3,6 +3,8 @@ from app.service_controller.admin_service import AdminService
 from app.service_controller.auth_service import AuthService
 from app.service_controller.payment_service import PaymentService
 from app.service_controller.partner_service import PartnerService
+from app.service_controller.agent_service import AgentService
+from app.service_controller.dealer_service import DealerService
 from pydantic import BaseModel, EmailStr, ValidationError,constr
 from app.utils import response_with_code,generate_otp,send_otp_email,convert_objectid_to_str
 from app.auth_controller.auth import AuthService
@@ -202,12 +204,32 @@ def list_partners():
     service = PartnerService(current_app.db)
     partners = service.list_all_partners()
     return response_with_code(200, "Partner data fetched", partners)
+# --------
+def list_agents():
+    service = AgentService(current_app.db)
+    agents = service.list_all_agents()
+    return response_with_code(200, "Agent data fetched", agents)
+
+def list_dealers():
+    service = DealerService(current_app.db)
+    dealers = service.list_all_dealers()
+    return response_with_code(200, "Agent data fetched", dealers)
 
 def get_partner_overview():
     service = PartnerService(current_app.db)
     partners = service.get_all_partners_for_admin()
     return response_with_code(200, "Success", partners)
 
+def get_agent_overview():
+    service = AgentService(current_app.db)
+    agents = service.get_all_agents_for_admin()
+    return response_with_code(200, "Success", agents)
+
+def get_dealer_overview():
+    service = DealerService(current_app.db)
+    dealers = service.get_all_dealers_for_admin()
+    return response_with_code(200, "Success", dealers)
+# ---------
 def get_all_collaborators():
     payment_service = PaymentService(current_app.db)
     collaborators = payment_service.get_all_collaborators()
@@ -292,25 +314,3 @@ def admin_decline_plot():
         return response_with_code(400, error)
 
     return response_with_code(200, "Plot request declined successfully", result)
-# def handle_user_request():
-#     try:
-#         data = request.get_json()
-#         user_id = data.get("userId")
-#         action = data.get("action")
-#         plan_type = data.get("initialPlanType")  
-
-#         if not user_id or action not in ["Accepted", "Ignored"]:
-#             return response_with_code(400, "Invalid user ID or action")
-
-#         admin_service = AdminService(current_app.db)
-
-#         if action == "Accepted":
-#             return admin_service.approve_user(user_id, plan_type)
-#         elif action == "Ignored":
-#             return admin_service.decline_user(user_id)
-
-#         # 🚨 Fallback return to prevent None being returned
-#         return response_with_code(400, "Unknown action")
-
-#     except Exception as e:
-#         return response_with_code(500, f"Internal server error: {str(e)}")  
