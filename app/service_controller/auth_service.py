@@ -32,7 +32,17 @@ class AuthService:
                         self.auth_model.delete_user_by_id(user_id)
                         self.payment_model.delete_by_user_id(user_id)
                         self.create_plots_model.delete_by_user_id(user_id)
-                        self.partner_model.remove_referral_user(user_id)
+                        
+                        # ✅ Remove from partner referrals with error handling
+                        try:
+                            self.partner_model.remove_referral_user(user_id)
+                        except AttributeError:
+                            # Fallback: manually remove from referrals if method doesn't exist
+                            from bson import ObjectId
+                            self.partner_model.partners.update_many(
+                                {"referrals": ObjectId(user_id)},
+                                {"$pull": {"referrals": ObjectId(user_id)}}
+                            )
 
                         return None, "You did not complete payment within 15 minutes. Please register again."
                     else:

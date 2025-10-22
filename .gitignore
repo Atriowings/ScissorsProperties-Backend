@@ -70,6 +70,8 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+build/
+tmp/
 
 # PyBuilder
 target/
@@ -90,6 +92,10 @@ ipython_config.py
 #   having no cross-platform support, pipenv may install dependencies that don't work, or not
 #   install all needed dependencies.
 #Pipfile.lock
+Pipfile.lock
+
+# poetry
+poetry.lock
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
 __pypackages__/
@@ -106,6 +112,9 @@ celerybeat.pid
 .venv
 env/
 venv/
+
+.venv
+env/
 ENV/
 env.bak/
 venv.bak/
@@ -138,3 +147,26 @@ dmypy.json
 # OS
 .DS_Store
 Thumbs.db
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# VS Code
+.vscode/
+
+# Local .env files
+*.env
+
+# Database files
+*.sqlite3
+*.db
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini

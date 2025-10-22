@@ -152,3 +152,10 @@ class Partner:
 
     def get_by_referral_code(self, referral_code):
         return self.partners.find_one({"myReferralId": referral_code})
+
+    def remove_referral_user(self, user_id):
+        """Remove a user from all partners' referral lists"""
+        return self.partners.update_many(
+            {"referrals": ObjectId(user_id)},
+            {"$pull": {"referrals": ObjectId(user_id)}}
+        )
