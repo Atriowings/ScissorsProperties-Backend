@@ -1,17 +1,19 @@
-from flask import request, current_app
+from flask import request, jsonify, current_app
 from app.service_controller.dealer_service import DealerService
 from app.service_controller.auth_service import AuthService
 from app.model_controller.auth_model import User
 from app.utils import response_with_code,send_wallet_withdraw_request_email_to_admin,send_dealer_decline_email,send_dealer_credentials_email,send_admin_notification_email,send_dealer_request_email_to_admin,send_wallet_notification_email
 
+
 def handle_dealer_request():
     data = request.get_json()
     user_id = data.get("user_id")
-    dealer_details = data.get("dealerDetails")  # Assuming dealer details are passed as a dictionary
+    upi = data.get("upi")
+    upi_mobile_number = data.get("upiMobileNumber")
     upgrade_type = data.get("upgradeType") 
 
-    if not user_id or not dealer_details or not upgrade_type:
-        return response_with_code(400, "Missing user_id, dealer details, or upgradeType")
+    if not user_id or not upi or not upi_mobile_number or not upgrade_type:
+        return response_with_code(400, "Missing user_id, UPI details, or upgradeType")
 
     dealer_service = DealerService(current_app.db)
     auth_service = AuthService(current_app.db)
@@ -20,7 +22,7 @@ def handle_dealer_request():
     if not user:
         return response_with_code(404, "User not found")
 
-    result = dealer_service.create_dealer(user_id, dealer_details, upgrade_type)
+    result = dealer_service.create_dealer(user_id, upi, upi_mobile_number, upgrade_type)
     
     if isinstance(result, dict) and result.get("status") == "exists":
         return response_with_code(400, result["message"])
@@ -53,6 +55,7 @@ def approve_dealer_request():
 
     # Update user status
     auth_service.update_user_by_id(user_id, {
+        # "requestType": "Dealer",
         "dealerStatus": "Approved",
         "isDealer": True,
         "disabled": False
@@ -65,6 +68,8 @@ def approve_dealer_request():
     send_dealer_credentials_email(dealer_name, user.get("email"))
 
     return response_with_code(200, f"Dealer approved and credentials sent to {user.get('email')}")
+
+
 
 def decline_dealer_request():
     data = request.get_json()
@@ -83,6 +88,7 @@ def decline_dealer_request():
     auth_service.update_user_by_id(user_id, {
         "requestType": "User",
         "dealerName": None,
+        "paymentStatus": "Declined",
         "isDealer": False,
         "disabled": False
     })
@@ -101,7 +107,7 @@ def dealer_dashboard():
     data, error = dealer_service.get_dealer_dashboard(user_id)
     if error:
         return response_with_code(400, error)
-    return response_with_code(200, "Dashboard data fetched", data)
+    return response_with_code(200, "Dashboard data fetched",data )
 
 def request_dealer_wallet_withdrawal():
     data = request.get_json()

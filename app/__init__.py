@@ -43,7 +43,7 @@ def create_app():
 
     # ✅ SIMPLE CORS CONFIGURATION
     CORS(app, 
-         origins=['https://scaj.shop', 'https://www.scaj.shop'],
+         origins=['http://localhost:3000'],
          allow_headers=['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
          methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
          supports_credentials=True)
@@ -56,6 +56,8 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(admin_bp,url_prefix='/api/admin')
     app.register_blueprint(partner_bp,url_prefix='/api/partner')
+    app.register_blueprint(agent_bp,url_prefix='/api/agent')
+    app.register_blueprint(dealer_bp,url_prefix='/api/dealer')
     app.register_blueprint(service_bp,url_prefix='/api/service')
 
     return app

@@ -4,14 +4,16 @@ from app.service_controller.auth_service import AuthService
 from app.model_controller.auth_model import User
 from app.utils import response_with_code,send_wallet_withdraw_request_email_to_admin,send_agent_decline_email,send_agent_credentials_email,send_admin_notification_email,send_agent_request_email_to_admin,send_wallet_notification_email
 
+
 def handle_agent_request():
     data = request.get_json()
     user_id = data.get("user_id")
-    agent_details = data.get("agentDetails")  # Assuming agent details are passed as a dictionary
+    upi = data.get("upi")
+    upi_mobile_number = data.get("upiMobileNumber")
     upgrade_type = data.get("upgradeType") 
 
-    if not user_id or not agent_details or not upgrade_type:
-        return response_with_code(400, "Missing user_id, agent details, or upgradeType")
+    if not user_id or not upi or not upi_mobile_number or not upgrade_type:
+        return response_with_code(400, "Missing user_id, UPI details, or upgradeType")
 
     agent_service = AgentService(current_app.db)
     auth_service = AuthService(current_app.db)
@@ -20,7 +22,7 @@ def handle_agent_request():
     if not user:
         return response_with_code(404, "User not found")
 
-    result = agent_service.create_agent(user_id, agent_details, upgrade_type)
+    result = agent_service.create_agent(user_id, upi, upi_mobile_number, upgrade_type)
     
     if isinstance(result, dict) and result.get("status") == "exists":
         return response_with_code(400, result["message"])
@@ -48,23 +50,26 @@ def approve_agent_request():
     if not user:
         return response_with_code(404, "User not found")
 
-    # Generate and assign agentName
+    # Generate and assign partnerName
     agent_name = auth_service.assign_agent_name(user_id)
 
     # Update user status
     auth_service.update_user_by_id(user_id, {
+        # "requestType": "Agent",
         "agentStatus": "Approved",
         "isAgent": True,
         "disabled": False
     })
 
-    # Update agent status
+    # Update partner status
     agent_service.update_agent_status(user_id, "Approved")
 
     # Send email (agentName only, no password)
     send_agent_credentials_email(agent_name, user.get("email"))
 
     return response_with_code(200, f"Agent approved and credentials sent to {user.get('email')}")
+
+
 
 def decline_agent_request():
     data = request.get_json()
@@ -83,6 +88,7 @@ def decline_agent_request():
     auth_service.update_user_by_id(user_id, {
         "requestType": "User",
         "agentName": None,
+        "paymentStatus": "Declined",
         "isAgent": False,
         "disabled": False
     })
@@ -101,7 +107,7 @@ def agent_dashboard():
     data, error = agent_service.get_agent_dashboard(user_id)
     if error:
         return response_with_code(400, error)
-    return response_with_code(200, "Dashboard data fetched", data)
+    return response_with_code(200, "Dashboard data fetched",data )
 
 def request_agent_wallet_withdrawal():
     data = request.get_json()
@@ -176,7 +182,7 @@ def decline_agent_wallet_withdrawal():
             to_email=user.get("email"),
             subject="Agent Wallet Withdrawal Declined",
             message=(
-                "Your agent wallet withdrawal request has been declined by the admin.\n\n"
+                "Your Agent wallet withdrawal request has been declined by the admin.\n\n"
                 "Please contact admin at scissors@gmail.com for further information."
             )
         )
