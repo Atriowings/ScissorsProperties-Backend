@@ -51,6 +51,8 @@ def create_app():
     from app.route_controller.auth_route import auth_bp
     from app.route_controller.admin_route import admin_bp
     from app.route_controller.partner_route import partner_bp
+    from app.route_controller.agent_route import agent_bp
+    from app.route_controller.dealer_route import dealer_bp
     from app.route_controller.service_route import service_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')

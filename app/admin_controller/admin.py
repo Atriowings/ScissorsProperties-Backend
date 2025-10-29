@@ -15,9 +15,9 @@ from app.service_controller.plot_service import PlotService
 
 class AdminSchema(BaseModel):
     email: EmailStr
-    adminId:str
-    password:str
-    mobileNumber:int
+    adminName: str
+    password: str
+    mobileNumber: int
 
 class LoginSchema(BaseModel):
     email:str

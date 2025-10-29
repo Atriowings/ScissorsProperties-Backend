@@ -270,14 +270,12 @@ class AdminService:
             if not plot_doc:
                 return response_with_code(500, "Plot generation failed")
 
-            if plan_type != "C":
-                plot_doc["paidMonths"] = 60
+            # ✅ For Plans A and B (full payment), set status to Completed after approval
+            # ✅ For Plans C and D (EMI), the status is already set correctly by create_plot
+            if plan_type in ["A", "B"]:
                 plot_doc["fullPaymentStatus"] = "Completed"
-
-            if plan_type != "D":
-                plot_doc["paidMonths"] = 150
-                plot_doc["fullPaymentStatus"] = "Completed"
-    
+            # ✅ Note: For C and D plans, fullPaymentStatus should remain "Pending" 
+            # ✅ until all EMI payments are completed (handled by EMI approval logic)
 
             self.db.plots.insert_one(plot_doc)
 

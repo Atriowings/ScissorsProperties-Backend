@@ -72,10 +72,13 @@ class PlotService:
             paid_months = final_plot.get("paidMonths", 0)
             total_months = final_plot.get("totalMonths", 0)
             final_plot["fullPaymentStatus"] = "Completed" if paid_months >= total_months else "Pending"
-        if final_plot["planType"] == "D":
+        elif final_plot["planType"] == "D":
             paid_months = final_plot.get("paidMonths", 0)
             total_months = final_plot.get("totalMonths", 0)
-            final_plot["fullPaymentStatus"] = "Completed" if paid_months >= total_months else "Pending"    
+            final_plot["fullPaymentStatus"] = "Completed" if paid_months >= total_months else "Pending"
+        elif final_plot["planType"] in ["A", "B"]:
+            # Plans A and B are full payment plans, always Pending until payment is approved
+            final_plot["fullPaymentStatus"] = "Pending"
         else:
             final_plot["fullPaymentStatus"] = "Pending"
 
@@ -202,7 +205,7 @@ class PlotService:
             "fullPaymentStatus": "Completed",
             "emiPaymentRequested": False,
             "paidAmount": 600000 if plot["planType"] == "A" else 300000,
-            "paidMonths": 60,
+            "paidMonths": 0,  # Not applicable for full payment plans
             "pendingMonths": 0,
             "pendingMonthsList": [],
             "nextDue": 0,

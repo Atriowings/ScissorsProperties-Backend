@@ -31,12 +31,14 @@ class PlotModel:
             paid_amount = 600000
             pending_amount = 0
             emi_type = False
-            paid_months = 60
+            paid_months = 0  # Full payment plan, not EMI
             pending_months = 0
             pending_list = []
             next_due = 0
             next_due_month = None
             next_due_date = None
+            total_months = 0  # Not applicable for full payment
+            emi_size = 0  # Not applicable
 
         elif plan_type == "B":
             sq_feet = 600
@@ -44,12 +46,14 @@ class PlotModel:
             paid_amount = 300000
             pending_amount = 0
             emi_type = False
-            paid_months = 60
+            paid_months = 0  # Full payment plan, not EMI
             pending_months = 0
             pending_list = []
             next_due = 0
             next_due_month = None
             next_due_date = None
+            total_months = 0  # Not applicable for full payment
+            emi_size = 0  # Not applicable
 
         elif plan_type == "C":
             sq_feet = 600
