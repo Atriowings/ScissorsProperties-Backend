@@ -40,6 +40,9 @@ class User:
     def find_by_partnername(self, partner_name):
         return self.users.find_one({'partnerName': partner_name})
 
+    def find_by_agentname(self, agent_name):
+        return self.users.find_one({'agentName': agent_name})
+
     def find_by_email(self, email):
         return self.users.find_one({'email': email})
 
@@ -158,6 +161,24 @@ class User:
             {"$set": {"partnerName": new_partner_name}}
         )
         return new_partner_name
+
+    def generate_next_agent_name(self):
+        last_user = self.users.find_one(
+            {"agentName": {"$regex": r"^AG\d{6}$"}},
+            sort=[("agentName", -1)]
+        )
+        if last_user and last_user.get("agentName"):
+            last_num = int(last_user["agentName"][2:])
+            return f"AG{str(last_num + 1).zfill(6)}"
+        return "AG000001"
+
+    def assign_agent_name(self, user_id):
+        new_agent_name = self.generate_next_agent_name()
+        self.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"agentName": new_agent_name}}
+        )
+        return new_agent_name
 
     def get_last_plot_number(self):
         user = self.users.find_one(

@@ -63,7 +63,8 @@ class AuthService:
             self.auth_model.find_by_username(data.login_input)
             or self.auth_model.find_by_email(data.login_input)
             or self.auth_model.find_by_mobile(data.login_input)
-            or self.auth_model.find_by_partnername(data.login_input)  
+            or self.auth_model.find_by_partnername(data.login_input)
+            or self.auth_model.find_by_agentname(data.login_input)
         )
 
         if not user:
@@ -318,3 +319,6 @@ class AuthService:
 
     def assign_partner_name(self, user_id):
         return self.auth_model.assign_partner_name(user_id)
+
+    def assign_agent_name(self, user_id):
+        return self.auth_model.assign_agent_name(user_id)

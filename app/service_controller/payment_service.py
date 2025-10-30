@@ -704,5 +704,64 @@ class PaymentService:
     def get_collaborator_by_user(self, user_id):
         return self.payment_model.get_payment_by_user(user_id)
     
+    def send_credentials_for_emi_user(self, user_id, plot_id):
+        """
+        Fallback method to send credentials for EMI users if not sent during admin approval.
+        This is called when the first EMI payment is approved but credentials haven't been sent yet.
+        
+        ADDED (Date: 2025-01-XX): This method was missing but was being called from auth.py.
+        Serves as a fallback mechanism to ensure credentials are sent even if they weren't
+        sent during the initial admin approval process.
+        
+        See PLAN_D_CREDENTIAL_EMAIL_FIX.md for detailed documentation.
+        """
+        user = self.auth_model.find_by_id(user_id)
+        if not user:
+            return None, "User not found"
+        
+        # Check if credentials were already sent
+        if user.get("credentialsSent"):
+            return True, "Credentials already sent"
+        
+        # Get payment info
+        payment = self.payment_model.get_payment_by_user(user_id)
+        if not payment:
+            return None, "Payment record not found"
+        
+        plot = self.db.plots.find_one({"_id": ObjectId(plot_id), "userId": ObjectId(user_id)})
+        if not plot:
+            return None, "Plot not found"
+        
+        plan_type = plot.get("planType")
+        if plan_type not in ["C", "D"]:
+            return None, "Only Plan C & D support this flow"
+        
+        # Use AdminService to send credentials (reuse existing logic)
+        from app.service_controller.admin_service import AdminService
+        admin_service = AdminService(self.db)
+        
+        # This will create plot if needed and send credentials
+        result = admin_service._final_approval_and_send_credentials(
+            user_id, 
+            user.get("email"), 
+            plan_type, 
+            payment
+        )
+        
+        # _final_approval_and_send_credentials returns a Flask response object
+        # Check if it's successful (status code 200)
+        if hasattr(result, 'status_code') and result.status_code == 200:
+            return True, None
+        else:
+            # Extract error message if available
+            error_msg = "Failed to send credentials"
+            if hasattr(result, 'get_json'):
+                try:
+                    data = result.get_json()
+                    error_msg = data.get('message', error_msg)
+                except:
+                    pass
+            return None, error_msg
+    
 
 

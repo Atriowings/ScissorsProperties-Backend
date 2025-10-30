@@ -9,6 +9,7 @@ class Admin:
         self.users = db.users         
         self.payment = db.payment
         self.partners = db.partners
+        self.agents = db.agents
         self.plots = db.plots
 
     def create_admin_user(self, data):
@@ -99,6 +100,9 @@ class Admin:
             partners = list(self.partners.find({"userId": {"$in": user_ids}}))
             partner_map = {p['userId']: p for p in partners}
 
+            agents = list(self.agents.find({"userId": {"$in": user_ids}}))
+            agent_map = {a['userId']: a for a in agents}
+
             plots = list(self.plots.find({"userId": {"$in": user_ids}}))
 
             result = []
@@ -113,6 +117,7 @@ class Admin:
                     "user": user,
                     "payment": payment_map.get(user_id, {}),
                     "partner": partner_map.get(user_id, {}),
+                    "agent": agent_map.get(user_id, {}),
                     "plots": user_plots  # Now this is a list of plot objects
                 })
 

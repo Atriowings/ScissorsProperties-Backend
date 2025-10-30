@@ -174,7 +174,7 @@ class AdminService:
                 return response_with_code(404, "User not found")
 
             plot = self.db.plots.find_one({"userId": ObjectId(user_id)})
-            payment = self.payment_model.get_payment_by_user(user_id) if plan_type == 'C' else None
+            payment = self.payment_model.get_payment_by_user(user_id) if plan_type in ['C', 'D'] else None
             payment_status = plot.get('fullPaymentStatus') if plot else None
             
             if not plan_type and payment:
@@ -238,10 +238,23 @@ class AdminService:
             return response_with_code(400, f"Invalid plan type: {plan_type}")
         
     def _final_approval_and_send_credentials(self, user_id, email, plan_type, payment):
+        """
+        Generate credentials and send email for approved users.
+        
+        FIX (Date: 2025-01-XX): Added plot existence check to handle cases where
+        plots may already exist (particularly for Plan D users). Previously, the
+        method always tried to create a new plot, causing failures when a plot
+        already existed, which prevented credentials from being sent.
+        
+        See PLAN_D_CREDENTIAL_EMAIL_FIX.md for detailed documentation.
+        """
         prefix = "500550"
         suffix = "5"
         retry_limit = 5
 
+        # ✅ Check if plot already exists for this user (important for Plan D users who may have plots created during registration)
+        existing_plot = self.db.plots.find_one({"userId": ObjectId(user_id)})
+        
         last_user = self.auth_model.get_last_approved_user()
         if last_user and last_user.get("username", "").startswith(prefix):
             try:
@@ -257,27 +270,32 @@ class AdminService:
             plain_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
             hashed_password = generate_password_hash(plain_password)
 
-            # ✅ Prepare plot payload
-            plot_payload = {
-                "userId": ObjectId(user_id),
-                "planType": plan_type,
-                "upi": payment.get("upi"),
-                "upiMobileNumber": payment.get("upiMobileNumber")
-            }
+            # ✅ If plot already exists, use it; otherwise create new one
+            if existing_plot:
+                plot_doc = existing_plot
+            else:
+                # ✅ Prepare plot payload
+                plot_payload = {
+                    "userId": ObjectId(user_id),
+                    "planType": plan_type,
+                    "upi": payment.get("upi"),
+                    "upiMobileNumber": payment.get("upiMobileNumber")
+                }
 
-            # ✅ Create plot document
-            plot_doc = self.create_plots_model.create_plot(plot_payload)
-            if not plot_doc:
-                return response_with_code(500, "Plot generation failed")
+                # ✅ Create plot document
+                plot_doc = self.create_plots_model.create_plot(plot_payload)
+                if not plot_doc:
+                    return response_with_code(500, "Plot generation failed")
 
-            # ✅ For Plans A and B (full payment), set status to Completed after approval
-            # ✅ For Plans C and D (EMI), the status is already set correctly by create_plot
-            if plan_type in ["A", "B"]:
-                plot_doc["fullPaymentStatus"] = "Completed"
-            # ✅ Note: For C and D plans, fullPaymentStatus should remain "Pending" 
-            # ✅ until all EMI payments are completed (handled by EMI approval logic)
+                # ✅ For Plans A and B (full payment), set status to Completed after approval
+                # ✅ For Plans C and D (EMI), the status is already set correctly by create_plot
+                if plan_type in ["A", "B"]:
+                    plot_doc["fullPaymentStatus"] = "Completed"
+                # ✅ Note: For C and D plans, fullPaymentStatus should remain "Pending" 
+                # ✅ until all EMI payments are completed (handled by EMI approval logic)
 
-            self.db.plots.insert_one(plot_doc)
+                # ✅ Only insert if plot doesn't exist
+                self.db.plots.insert_one(plot_doc)
 
             # ✅ Update user's credential & plot info
             update_data = {
