@@ -43,7 +43,7 @@ def create_app():
 
     # ✅ SIMPLE CORS CONFIGURATION
     CORS(app, 
-         origins=['http://localhost:3000'],
+         origins=['http://localhost:3000', 'https://scissorsproperties.com','https://www.scissorsproperties.com'],
          allow_headers=['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
          methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
          supports_credentials=True)
